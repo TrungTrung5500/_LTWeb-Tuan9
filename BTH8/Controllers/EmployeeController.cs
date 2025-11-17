@@ -40,17 +40,20 @@ namespace BTH8.Controllers
             return View();
         }
 
-        [HttpGet]
-        public ActionResult Create()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create([Bind(Include = "Id,Name,Gender,City,Deptid")] tbl_Employee tbl_Employee)
         {
-            ViewBag.Deptid = new SelectList(db.tbl_Deparment, "Deptid", "Name");
+            if (ModelState.IsValid)
+            {
+                db.tbl_Employee.Add(tbl_Employee);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
 
-            List<SelectListItem> genderList = new List<SelectListItem>();
-            genderList.Add(new SelectListItem { Text = "Nam", Value = "Nam" });
-            genderList.Add(new SelectListItem { Text = "Nữ", Value = "Nữ" });
-            ViewBag.GenderList = new SelectList(genderList, "Value", "Text");
-
-            return View();
+            ViewBag.Deptid = new SelectList(db.tbl_Deparment, "Deptid", "Name", tbl_Employee.Deptid);
+            ViewBag.GenderList = new SelectList(new List<string> { "Nam", "Nữ" }, tbl_Employee.Gender);
+            return View(tbl_Employee);
         }
 
         public ActionResult Edit(int? id)
@@ -107,6 +110,22 @@ namespace BTH8.Controllers
             db.tbl_Employee.Remove(tbl_Employee);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+        public ActionResult IndexJoined()
+        {
+            var joinedList = from e in db.tbl_Employee
+                             join d in db.tbl_Deparment on e.Deptid equals d.Deptid
+                             select new EmployeeDetailViewModel
+                             {
+                                 MaNV = e.Id,
+                                 TenNV = e.Name,
+                                 GioiTinh = e.Gender,
+                                 ThanhPho = e.City,
+                                 MaPB = d.Deptid, 
+                                 TenPhong = d.Name
+                             };
+
+            return View(joinedList.ToList());
         }
     }
 }

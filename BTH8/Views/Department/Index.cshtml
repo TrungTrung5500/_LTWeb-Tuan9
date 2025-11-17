@@ -1,0 +1,11 @@
+﻿@model IEnumerable<BTH8.Models.tbl_Deparment>
+@{ ViewBag.Title = "Phòng ban"; }
+
+<h2>DANH SÁCH PHÒNG BAN</h2>
+
+@foreach (var item in Model)
+{
+    <p style="font-size: 1.2em;">
+        @Html.ActionLink(item.Name, "ShowEmployeesByDept", new { id = item.Deptid })
+    </p>
+}
